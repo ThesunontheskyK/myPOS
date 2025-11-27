@@ -254,3 +254,54 @@
   background: #ef4444;
   color: white;
 }
+
+/* Product Management Table */
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.product-table th, .product-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.product-table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
+.edit-btn {
+  background-color: #f59e0b; /* สีส้ม */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+/* Form Styling inside Modal */
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* สำคัญมาก เพื่อไม่ให้ input ล้น */
+}

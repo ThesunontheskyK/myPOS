@@ -190,6 +190,55 @@ app.post('/print-receipt', async (req, res) => {
     }
 });
 
+// API: เพิ่มสินค้าใหม่ (Create)
+app.post('/products', async (req, res) => {
+    const { name, barcode, price, stock, image_url } = req.body;
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const [result] = await connection.execute(
+            'INSERT INTO products (name, barcode, price, stock, image_url) VALUES (?, ?, ?, ?, ?)',
+            [name, barcode, price, stock, image_url]
+        );
+        res.json({ id: result.insertId, message: 'เพิ่มสินค้าเรียบร้อย' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    } finally {
+        await connection.end();
+    }
+});
+
+// API: แก้ไขสินค้า (Update)
+app.put('/products/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, barcode, price, stock, image_url } = req.body;
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        await connection.execute(
+            'UPDATE products SET name=?, barcode=?, price=?, stock=?, image_url=? WHERE id=?',
+            [name, barcode, price, stock, image_url, id]
+        );
+        res.json({ message: 'แก้ไขข้อมูลเรียบร้อย' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    } finally {
+        await connection.end();
+    }
+});
+
+// API: ลบสินค้า (Delete)
+app.delete('/products/:id', async (req, res) => {
+    const { id } = req.params;
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        await connection.execute('DELETE FROM products WHERE id=?', [id]);
+        res.json({ message: 'ลบสินค้าเรียบร้อย' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    } finally {
+        await connection.end();
+    }
+});
+
 // รัน Server ที่ Port 3000
 app.listen(3000, () => {
     console.log('POS Backend running on port 3000');

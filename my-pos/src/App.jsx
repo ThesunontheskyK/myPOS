@@ -1,19 +1,17 @@
-import { useState } from 'react'; // เพิ่ม useState
+import { useState } from 'react';
 import './App.css';
 import { usePos } from './hooks/usePos';
 import ProductList from './components/ProductList';
 import Cart from './components/Cart';
-import Dashboard from './components/Dashboard'; // Import มาใหม่
+import Dashboard from './components/Dashboard';
+import ProductManagement from './components/ProductManagement'; // <--- 1. Import มา
 
 function App() {
   const { products, cart, addToCart, removeFromCart, calculateTotal, handleCheckout, formatCurrency } = usePos();
-  
-  // สร้าง State สำหรับสลับหน้า (default เป็น 'pos')
   const [currentTab, setCurrentTab] = useState('pos');
 
   return (
     <div className="app-container">
-      {/* แถบเมนูข้างบน */}
       <nav className="navbar">
         <h1>🍵 My POS Shop</h1>
         <div className="menu-buttons">
@@ -29,18 +27,20 @@ function App() {
           >
             แดชบอร์ด
           </button>
+          {/* 2. เพิ่มปุ่มเมนูจัดการสินค้า */}
+          <button 
+            className={currentTab === 'management' ? 'active' : ''} 
+            onClick={() => setCurrentTab('management')}
+          >
+            จัดการสินค้า
+          </button>
         </div>
       </nav>
 
-      {/* ส่วนเนื้อหาที่จะเปลี่ยนไปตาม Tab */}
       <div className="content">
-        {currentTab === 'pos' ? (
+        {currentTab === 'pos' && (
           <div className="pos-container">
-            <ProductList 
-              products={products} 
-              addToCart={addToCart} 
-              formatCurrency={formatCurrency} 
-            />
+            <ProductList products={products} addToCart={addToCart} formatCurrency={formatCurrency} />
             <Cart 
               cart={cart} 
               removeFromCart={removeFromCart} 
@@ -49,8 +49,15 @@ function App() {
               formatCurrency={formatCurrency} 
             />
           </div>
-        ) : (
+        )}
+        
+        {currentTab === 'dashboard' && (
           <Dashboard formatCurrency={formatCurrency} />
+        )}
+
+        {/* 3. เพิ่มเงื่อนไขแสดงหน้าจัดการสินค้า */}
+        {currentTab === 'management' && (
+          <ProductManagement formatCurrency={formatCurrency} />
         )}
       </div>
     </div>
