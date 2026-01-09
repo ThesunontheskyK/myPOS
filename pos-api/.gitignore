@@ -1,0 +1,21 @@
+# โฟลเดอร์รวม Library (ห้ามเอาขึ้นเด็ดขาดเพราะขนาดใหญ่มาก)
+node_modules/
+bin/
+obj/
+
+# ไฟล์เก็บความลับ (เช่น Password หรือ API Keys)
+.env
+*.config
+
+# ไฟล์ที่สร้างโดยระบบปฏิบัติการ
+.DS_Store
+Thumbs.db
+
+# โฟลเดอร์ผลลัพธ์การ Build
+dist/
+build/
+out/
+
+# ไฟล์ Log หรือไฟล์ขยะ
+*.log
+npm-debug.log*
