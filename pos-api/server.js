@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const generatePayload = require('promptpay-qr');
 const SHOP_PROMPTPAY_ID = '0980077527';
 const { ThermalPrinter, PrinterTypes, CharacterSet, BreakLine } = require('node-thermal-printer');
-
+const axios = require('axios');
 
 const app = express();
 app.use(cors()); // อนุญาตให้ Frontend (React) เรียกใช้งานได้
@@ -236,6 +236,58 @@ app.delete('/products/:id', async (req, res) => {
         res.status(500).json({ error: error.message });
     } finally {
         await connection.end();
+    }
+});
+
+// API ใหม่: สำหรับตรวจสอบสลิปเมื่อลูกค้าโอนเงินเสร็จ
+app.post('/verify-slip', async (req, res) => {
+    const { payload, expectedAmount } = req.body;
+    const EASYSLIP_ACCESS_TOKEN = 'YOUR_EASYSLIP_TOKEN'; // เอาจากระบบ EasySlip
+
+    try {
+        // 1. ยิงไปเช็คที่ EasySlip ตามเอกสารที่คุณศึกษามา
+        const response = await axios.get('https://developer.easyslip.com/api/v1/verify', {
+            params: {
+                payload: payload,
+                checkDuplicate: true // สำคัญมาก! ป้องกันการวนใช้สลิปเดิม
+            },
+            headers: {
+                'Authorization': `Bearer ${EASYSLIP_ACCESS_TOKEN}`
+            }
+        });
+
+        const slipData = response.data.data;
+
+        // 2. ตรวจสอบเงื่อนไข: ยอดเงินตรงไหม? และ เงินเข้าบัญชีเราจริงไหม?
+        // เช็คจำนวนเงิน (EasySlip คืนค่าเป็นตัวเลขใน amount.amount)
+        const isAmountMatch = slipData.amount.amount === parseFloat(expectedAmount);
+        
+        // เช็คชื่อผู้รับ (ควรตรงกับชื่อบัญชีคุณ)
+        // const isReceiverMatch = slipData.receiver.account.name.th.includes("ชื่อบัญชีคุณ");
+
+        if (isAmountMatch) {
+            // หากยอดเงินตรงกัน ให้ส่งผลลัพธ์กลับไปบอก Frontend ว่า "ผ่าน"
+            res.json({
+                success: true,
+                message: "ตรวจสอบสลิปสำเร็จ ยอดเงินถูกต้อง",
+                slipDetail: slipData
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: `ยอดเงินไม่ตรงกัน (สลิปโอนมา: ${slipData.amount.amount})`
+            });
+        }
+
+    } catch (error) {
+        console.error("Verification Error:", error.response ? error.response.data : error.message);
+        
+        // จัดการกรณีสลิปซ้ำ หรือ สลิปปลอม
+        const errorMsg = error.response?.data?.message || "เกิดข้อผิดพลาดในการตรวจสอบ";
+        res.status(error.response?.status || 500).json({
+            success: false,
+            message: errorMsg
+        });
     }
 });
 
